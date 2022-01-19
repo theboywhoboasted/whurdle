@@ -1,0 +1,2 @@
+# whurdle
+Solver for Wordle

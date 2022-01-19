@@ -9,10 +9,10 @@ import multiprocessing
 def play_game(args):
     word_choice, dictionary_path = args[:2]
     game = Wordle(word_choice, dictionary_path)
-    passed, word = PlayWordle(game).play(debug=False)
+    passed, word, styles = PlayWordle(game).play(debug=False)
     passed = passed and (word == word_choice)
     num_attempts = game.get_num_attempts()
-    return (passed, word, num_attempts, word_choice)
+    return (passed, word, num_attempts, word_choice, styles)
 
 
 def main():
@@ -44,11 +44,13 @@ def main():
     output = pool.map(play_game, lower_word_list)
     attempts_taken = []
     failed_words = []
-    for passed, word, num_attempts, word_choice in output:
+    for passed, word, num_attempts, word_choice, styles in output:
         if passed:
             attempts_taken.append(num_attempts)
         if (num_attempts > 6) or not passed:
             failed_words.append(word_choice)
+        if "overlap" in styles:
+            print(word_choice)
     print("Failed on {}".format(sorted(failed_words)))
     counter = collections.Counter(attempts_taken)
     print(sorted(counter.items()))

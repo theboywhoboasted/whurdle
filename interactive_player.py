@@ -30,7 +30,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--dictionary_path", required=True, help="Path to dictionary file"
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Whether it should print debug logs",
+    )
     args = parser.parse_args()
     mock_game = WordleInput(args.dictionary_path)
     print(instructions)
-    passed, word = PlayWordle(mock_game).play(debug=True)
+    passed, word, style = PlayWordle(mock_game).play(debug=args.verbose)

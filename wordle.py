@@ -1,13 +1,15 @@
-WORD_SIZE = 5
-NUM_ATTEMPTS = 6
+import argparse
 import getpass
 from colorama import Fore, Back, Style
 
+WORD_SIZE = 5
+NUM_ATTEMPTS = 6
+
 
 class Dictionary:
-    def __init__(self):
+    def __init__(self, text_path):
         word_list = []
-        with open("dictionary.csv") as f:
+        with open(text_path) as f:
             for line in f:
                 word = line.strip().lower()
                 if len(word) == WORD_SIZE:
@@ -36,9 +38,9 @@ class Wordle:
         "unused": Fore.BLACK,
     }
 
-    def __init__(self, target_word):
+    def __init__(self, target_word, dictionary_path):
         self.target_word = target_word
-        dictionary = Dictionary()
+        dictionary = Dictionary(dictionary_path)
         self.word_list = dictionary.word_list
         assert target_word in self.word_list
         self._num_attempts = 0
@@ -82,8 +84,13 @@ class Wordle:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d", "--dictionary_path", required=True, help="Path to dictionary file"
+    )
+    args = parser.parse_args()
     target_word = getpass.getpass("Which word do you want a wordle for?:")
-    game = Wordle(target_word)
+    game = Wordle(target_word, args.dictionary_path)
     print("Please keep attempting with 5-letter words without a prompt")
     while True:
         trial_word = getpass.getpass("")

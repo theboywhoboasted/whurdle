@@ -1,3 +1,4 @@
+import argparse
 import collections
 import random
 from wordle import Dictionary, Wordle, WORD_SIZE
@@ -5,8 +6,9 @@ from entropy import PlayWordle
 import multiprocessing
 
 
-def play_game(word_choice):
-    game = Wordle(word_choice)
+def play_game(args):
+    word_choice, dictionary_path = args[:2]
+    game = Wordle(word_choice, dictionary_path)
     passed, word = PlayWordle(game).play(debug=False)
     passed = passed and (word == word_choice)
     num_attempts = game.get_num_attempts()
@@ -14,24 +16,44 @@ def play_game(word_choice):
 
 
 def main():
-    # play game now!
-    random.seed(0)
-    word_list = Dictionary().word_list
-    attempts_taken = []
-    uncounted_words = 0
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d", "--dictionary_path", required=True, help="Path to dictionary file"
+    )
+    parser.add_argument(
+        "-n",
+        "--num_samples",
+        required=False,
+        default=None,
+        type=int,
+        help="Number of sampled words to use to test",
+    )
+    args = parser.parse_args()
+
+    word_list = Dictionary(args.dictionary_path).word_list
     print(len(word_list))
     pool = multiprocessing.Pool(8)
-    output = pool.map(play_game, [word.lower() for word in word_list])
+    if args.num_samples:
+        random.seed(0)
+        lower_word_list = [
+            (word.lower(), args.dictionary_path)
+            for word in random.sample(word_list, args.num_samples)
+        ]
+    else:
+        lower_word_list = [(word.lower(), args.dictionary_path) for word in word_list]
+    output = pool.map(play_game, lower_word_list)
+    attempts_taken = []
+    failed_words = []
     for passed, word, num_attempts, word_choice in output:
         if passed:
             attempts_taken.append(num_attempts)
         if (num_attempts > 6) or not passed:
-            print("Failed on " + word_choice)
-            uncounted_words += 1
+            failed_words.append(word_choice)
+    print("Failed on {}".format(sorted(failed_words)))
     counter = collections.Counter(attempts_taken)
     print(sorted(counter.items()))
     counted_words = sum(counter.values())
-    print(counted_words / (counted_words + uncounted_words))
+    print(counted_words / (counted_words + len(failed_words)))
 
 
 if __name__ == "__main__":

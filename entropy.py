@@ -124,7 +124,7 @@ class PlayWordle:
                         ordered_letter_counts,
                     )
                     styles.append("simple")
-                    if debug and (len(self.short_list) < 80):
+                    if debug and (len(self.short_list) < 40):
                         print(
                             "The short-listed words are: {}".format(
                                 ", ".join(self.short_list)

@@ -17,7 +17,11 @@ The ordered score is defined similarly, except that the probability is defined f
 
 # Accuracy numbers
 
-The success rate of the above algorithm is heavily dependent on which dictionary I use as the universe of all words. A larger dictionary will make for a bigger universe to search for, but will also allow me to choose from more words on each try. Having said that, the algorithm gets 99%+ words solved within 6 attempts with all the dictionaries I tried. Most of the words that it is unable to solve are the ones with repeated letters or words with too many adjacent words[^1]. I report here the results for 3 common English dictionaries:
+The success rate of the above algorithm is heavily dependent on which dictionary I use as the universe of all words for guessing as well as for the target words. The first version of my algorithm assumed that the set of all guessable words is the same as the set from which the target word is chosen. This blog post (https://lockwood.dev/wordle/python/2022/01/23/wordle-solved-average-3-64.html) mentions that this is indeed not true: while there are around 13k words that can be tried, only a quarter of those could be the target word. Having said that, the algorithm gets 99%+ words solved within 6 attempts with all the dictionaries I tried. Most of the words that it is unable to solve are the ones with repeated letters or words with too many adjacent words[^1]. 
+
+When using a different set of words for guessing and another to choose the guesses from (as used in Lockwood's post), my implementation is able to guess all the 2315 words within 6 tries. The distribution of number of attempts taken is [(2, 31), (3, 975), (4, 1143), (5, 161), (6, 5)] with a mean of 3.62 attempts.
+
+When using the same set of words for the target and to guess, here are the results for 3 common English dictionaries:
 
 1. dictionary.csv (a valid scrabble dictionary from https://github.com/zeisler/scrabble)
 Number of words: 8636
@@ -37,20 +41,18 @@ Accuracy: 99.89%
 Failed words: ['faxed', 'folly', 'jells', 'loses', 'loves', 'soles']
 Attempt counter: [(1, 1), (2, 42), (3, 1417), (4, 3087), (5, 1038), (6, 166)]
 
+
 # Suggested Improvements
 
-My current implementation can be greatly improved with the use of better data for computing the probabilities and hence the word scores. I worked under the assumption that the target word to be discovered is chosen uniformly at random from the dictionary of all 5-letter words and the same dictionary is used to validate the attempted word-tries. I discovered this blog post (https://lockwood.dev/wordle/python/2022/01/23/wordle-solved-average-3-64.html) that mentions that this is indeed not true. While there are around 10k words that can be tried, only a quarter of those could be the target word. I'll update this post soon with the accuracy of my solver using this information. [^2]
 
-Secondly, the algorithm that I have implemented is greedy. Thinking about more than one step at a time is computationally expensive in general, but it might be a good idea to do when we have very few words left to search from. The current solver does a bad job with words with too many adjacent words [^1] where it filters down to a fairly small number of words in the first couple of tries but struggles to move forward from there. This might be a good place to try a multi-step strategy.
+The algorithm that I have implemented is greedy. Thinking about more than one step at a time is computationally expensive in general, but it might be a good idea to do when we have very few words left to search from. The current solver does a bad job with words with too many adjacent words [^1] where it filters down to a fairly small number of words in the first couple of tries but struggles to move forward from there. This might be a good place to try a multi-step strategy.
 
-Finally, the scoring functions that I have chosen are the first things that came to my mind. There is no argument against against using (-p_i\*log(p_i)) instead of (p_i\*(1-p_i)), except maybe it might take a little longer to compute. There is no dearth of interesting scoring mechanisms that could be tried to get to a better accuracy level.
+Secondly, the scoring functions that I have chosen are the first things that came to my mind. There is no argument against against using (-p_i\*log(p_i)) instead of (p_i\*(1-p_i)), except maybe it might take a little longer to compute. There is no dearth of interesting scoring mechanisms that could be tried to get to a better accuracy level.
 
 # Acknowledgements
 
-Sincere thanks to Gary and Charu for introducing me to the game and helping me work through the various iterations of the algorithm. You are both awesome!
+Sincere Thanks to Gary and Charu for introducing me to the game and helping me work through the various iterations of the algorithm. You are both awesome!
 
-# Footnotes and Postscripts
+# Footnotes and Edits
 
 [^1]: I define adjacent words as words that can be formed by replacing one or two letters in a given word. For instance, the 1-adjacent words for 'eater' would be 'hater', 'water' and 'cater' sine they are different from 'eater at only the first letter. The list of 2-adjacent words would include 'paper', 'baler', 'payer', 'gazer', 'racer', 'maker', 'parer' and 'rarer'.
-
-[^2]: After using a different set of words for guessing and another to choose the guesses from, my implementation is able to guess all the 2315 words within 6 tries. The distribution of number of attempts taken is [(2, 31), (3, 975), (4, 1143), (5, 161), (6, 5)] with a mean of 3.62 attempts.

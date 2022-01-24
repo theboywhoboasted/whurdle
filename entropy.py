@@ -1,18 +1,23 @@
 import collections
-from wordle import Wordle, WORD_SIZE, WordleMaxAttempts
+from wordle import Dictionary, Wordle, WORD_SIZE, WordleMaxAttempts
 
 
 class PlayWordle:
-    def __init__(self, game_object):
+    def __init__(self, game_object, target_dictionary_path=None):
         self.game_object = game_object
-        self.word_list = game_object.word_list
+        self.guess_word_list = game_object.guess_word_list
+        if target_dictionary_path is None:
+            self.target_word_list = list(self.guess_word_list)
+        else:
+            self.target_word_list = Dictionary(target_dictionary_path).word_list
         self.letters_to_be_used = set()
         self.right_place_letters = {}
         self.wrong_place_letters = {i: set() for i in range(WORD_SIZE)}
 
     def print_state(self):
         var_dict = dict(vars(self))
-        var_dict["word_list"] = None
+        var_dict["target_word_list"] = None
+        var_dict["guess_word_list"] = None
         var_dict["short_list"] = len(var_dict["short_list"])
         var_dict["game_object"] = var_dict["game_object"].get_num_attempts()
         print("\nSolver state: {}".format(var_dict))
@@ -96,7 +101,7 @@ class PlayWordle:
         return ordered_letter_counts
 
     def play(self, debug=False):
-        self.short_list = self.word_list[:]
+        self.short_list = self.target_word_list[:]
         styles = []
         while True:
             if debug:
@@ -114,12 +119,12 @@ class PlayWordle:
                         self.short_list
                     )
                     score, word_choice = self.get_best_word_ordered(
-                        self.word_list,
+                        self.guess_word_list,
                         unordered_letter_weight,
                         ordered_letter_counts,
                     )
                     styles.append("simple")
-                    if debug and (len(self.short_list) < 40):
+                    if debug and (len(self.short_list) < 80):
                         print(
                             "The short-listed words are: {}".format(
                                 ", ".join(self.short_list)
@@ -156,6 +161,10 @@ class PlayWordle:
 
 
 if __name__ == "__main__":
-    game = Wordle("roker", "unix_words.txt")
-    passed, word, styles = PlayWordle(game).play(debug=True)
+    target_dictionary_path = "lockwood_target.txt"
+    guess_dictionary_path = "lockwood_guess.txt"
+    game = Wordle("eater", guess_dictionary_path)
+    passed, word, styles = PlayWordle(
+        game, target_dictionary_path=target_dictionary_path
+    ).play(debug=True)
     print((passed, word, styles, game.get_num_attempts()))

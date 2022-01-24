@@ -41,8 +41,8 @@ class Wordle:
     def __init__(self, target_word, dictionary_path):
         self.target_word = target_word
         dictionary = Dictionary(dictionary_path)
-        self.word_list = dictionary.word_list
-        assert target_word in self.word_list
+        self.guess_word_list = dictionary.word_list
+        assert target_word in self.guess_word_list
         self._num_attempts = 0
         self._tried_words = []
 
@@ -52,7 +52,7 @@ class Wordle:
     def play(self, trial_word):
         if self._num_attempts >= NUM_ATTEMPTS:
             raise WordleMaxAttempts
-        if len(trial_word) != WORD_SIZE or (trial_word not in self.word_list):
+        if len(trial_word) != WORD_SIZE or (trial_word not in self.guess_word_list):
             raise WordInvalid
         letter_map = ["unused"] * WORD_SIZE
         identified_positions = []

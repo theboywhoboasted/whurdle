@@ -5,7 +5,7 @@ from entropy import PlayWordle
 
 class WordleInput:
     def __init__(self, dictionary_path):
-        self.word_list = Dictionary(dictionary_path).word_list
+        self.guess_word_list = Dictionary(dictionary_path).word_list
         self._num_attempts = 0
 
     def get_num_attempts(self):
@@ -28,7 +28,16 @@ if __name__ == "__main__":
     Use the following map: u: unused, r: right_place, w: wrong_place"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d", "--dictionary_path", required=True, help="Path to dictionary file"
+        "-d",
+        "--dictionary_path",
+        required=True,
+        help="Path to dictionary file for valid words",
+    )
+    parser.add_argument(
+        "--target_dictionary_path",
+        required=False,
+        default=None,
+        help="Path to dictionary file for the target words if not the same as valid words",
     )
     parser.add_argument(
         "-v",
@@ -37,6 +46,10 @@ if __name__ == "__main__":
         help="Whether it should print debug logs",
     )
     args = parser.parse_args()
+    if args.target_dictionary_path is None:
+        args.target_dictionary_path = args.dictionary_path
     mock_game = WordleInput(args.dictionary_path)
     print(instructions)
-    passed, word, style = PlayWordle(mock_game).play(debug=args.verbose)
+    passed, word, style = PlayWordle(
+        mock_game, target_dictionary_path=args.target_dictionary_path
+    ).play(debug=args.verbose)

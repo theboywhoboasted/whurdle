@@ -7,9 +7,11 @@ import multiprocessing
 
 
 def play_game(args):
-    word_choice, dictionary_path = args[:2]
+    word_choice, dictionary_path, target_dictionary_path = args[:3]
     game = Wordle(word_choice, dictionary_path)
-    passed, word, styles = PlayWordle(game).play(debug=False)
+    passed, word, styles = PlayWordle(
+        game, target_dictionary_path=target_dictionary_path
+    ).play(debug=False)
     passed = passed and (word == word_choice)
     num_attempts = game.get_num_attempts()
     return (passed, word, num_attempts, word_choice, styles)
@@ -18,7 +20,16 @@ def play_game(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d", "--dictionary_path", required=True, help="Path to dictionary file"
+        "-d",
+        "--dictionary_path",
+        required=True,
+        help="Path to dictionary file for valid words",
+    )
+    parser.add_argument(
+        "--target_dictionary_path",
+        required=False,
+        default=None,
+        help="Path to dictionary file for the target words if not the same as valid words",
     )
     parser.add_argument(
         "-n",
@@ -29,18 +40,23 @@ def main():
         help="Number of sampled words to use to test",
     )
     args = parser.parse_args()
+    if args.target_dictionary_path is None:
+        args.target_dictionary_path = args.dictionary_path
 
-    word_list = Dictionary(args.dictionary_path).word_list
+    word_list = Dictionary(args.target_dictionary_path).word_list
     print(len(word_list))
     pool = multiprocessing.Pool(8)
     if args.num_samples:
         random.seed(0)
         lower_word_list = [
-            (word.lower(), args.dictionary_path)
+            (word.lower(), args.dictionary_path, args.target_dictionary_path)
             for word in random.sample(word_list, args.num_samples)
         ]
     else:
-        lower_word_list = [(word.lower(), args.dictionary_path) for word in word_list]
+        lower_word_list = [
+            (word.lower(), args.dictionary_path, args.target_dictionary_path)
+            for word in word_list
+        ]
     output = pool.map(play_game, lower_word_list)
     attempts_taken = []
     failed_words = []

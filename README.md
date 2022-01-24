@@ -47,9 +47,9 @@ Finally, the scoring functions that I have chosen are the first things that came
 
 # Acknowledgements
 
-Sincere Thanks to Gary and Charu for introducing me to the game and helping me work through the various iterations of the algorithm. You are both awesome!
+Sincere thanks to Gary and Charu for introducing me to the game and helping me work through the various iterations of the algorithm. You are both awesome!
 
-# Footnotes and Edits
+# Footnotes and Postscripts
 
 [^1]: I define adjacent words as words that can be formed by replacing one or two letters in a given word. For instance, the 1-adjacent words for 'eater' would be 'hater', 'water' and 'cater' sine they are different from 'eater at only the first letter. The list of 2-adjacent words would include 'paper', 'baler', 'payer', 'gazer', 'racer', 'maker', 'parer' and 'rarer'.
 
